@@ -1,0 +1,8 @@
+it/uniroma1/di/tmancini/teaching/ai/search/cargo/Cargo$Heuristics.class
+it/uniroma1/di/tmancini/teaching/ai/search/cargo/CargoAction$UnloadCargoAction.class
+it/uniroma1/di/tmancini/teaching/ai/search/cargo/CargoState.class
+it/uniroma1/di/tmancini/teaching/ai/search/cargo/CargoAction$FlyCargoAction.class
+it/uniroma1/di/tmancini/teaching/ai/search/cargo/CargoAction$CargoActionFactory.class
+it/uniroma1/di/tmancini/teaching/ai/search/cargo/CargoAction$LoadCargoAction.class
+it/uniroma1/di/tmancini/teaching/ai/search/cargo/Cargo.class
+it/uniroma1/di/tmancini/teaching/ai/search/cargo/CargoAction.class
