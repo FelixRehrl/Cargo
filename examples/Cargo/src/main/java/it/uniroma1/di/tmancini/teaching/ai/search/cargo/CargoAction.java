@@ -24,26 +24,21 @@ public abstract class CargoAction extends Action {
 
 	public static class FlyCargoAction extends CargoAction {
 
-		private final String from;
-		private final String to;
-		private final String plane;
+		int at_plane_airport_1;
+		int at_plane_airport_2;
 
-		public FlyCargoAction(String from, String to, String plane) {
-			this.from = from;
-			this.to = to;
-			this.plane = plane;
-		}
+		ArrayList<Integer> preconditions = new ArrayList<Integer>();
+		ArrayList<Integer> negative_effects = new ArrayList<Integer>();
+		ArrayList<Integer> positive_effects = new ArrayList<Integer>();
 
-		public String getFrom() {
-			return from;
-		}
+		public FlyCargoAction(int at_plane_airport_1, int at_plane_airport_2) {
 
-		public String getTo() {
-			return to;
-		}
+			this.preconditions.add(at_plane_airport_1);
+			this.negative_effects.add(at_plane_airport_1);
+			this.positive_effects.add(at_plane_airport_2);
 
-		public String getPlane() {
-			return plane;
+			this.at_plane_airport_1 = at_plane_airport_1;
+			this.at_plane_airport_2 = at_plane_airport_2;
 		}
 
 		@Override
@@ -53,32 +48,48 @@ public abstract class CargoAction extends Action {
 
 		@Override
 		public String toString() {
-			return String.format("FlyCargoAction from %s to %s using plane %s", from, to, plane);
+			return Cargo.getFluentByIndex(at_plane_airport_1) + " ---> " + Cargo.getFluentByIndex(at_plane_airport_2);
 		}
+
+		@Override
+		public ArrayList<Integer> getPreconditions() {
+			return preconditions;
+		}
+
+		@Override
+		public ArrayList<Integer> getNegative_effects() {
+			return negative_effects;
+		}
+
+		@Override
+		public ArrayList<Integer> getPositive_effects() {
+			return positive_effects;
+		}
+
 	}
 
 	public static class LoadCargoAction extends CargoAction {
 
-		private final String cargo;
-		private final String airport;
-		private final String plane;
+		int at_plane_airport;
+		int at_cargo_airport;
+		int in_plane_cargo;
 
-		public LoadCargoAction(String cargo, String airport, String plane) {
-			this.cargo = cargo;
-			this.airport = airport;
-			this.plane = plane;
-		}
+		ArrayList<Integer> preconditions = new ArrayList<Integer>();
+		ArrayList<Integer> negative_effects = new ArrayList<Integer>();
+		ArrayList<Integer> positive_effects = new ArrayList<Integer>();
 
-		public String getCargo() {
-			return cargo;
-		}
+		public LoadCargoAction(int at_plane_airport, int at_cargo_airport, int in_plane_cargo) {
+			preconditions.add(at_plane_airport);
+			preconditions.add(at_cargo_airport);
 
-		public String getAirport() {
-			return airport;
-		}
+			negative_effects.add(at_cargo_airport);
 
-		public String getPlane() {
-			return plane;
+			positive_effects.add(in_plane_cargo);
+
+			this.at_plane_airport = at_plane_airport;
+			this.at_cargo_airport = at_cargo_airport;
+			this.in_plane_cargo = in_plane_cargo;
+
 		}
 
 		@Override
@@ -88,32 +99,49 @@ public abstract class CargoAction extends Action {
 
 		@Override
 		public String toString() {
-			return String.format("LoadCargoAction %s at %s on plane %s", cargo, airport, plane);
+			return Cargo.getFluentByIndex(this.at_plane_airport) + "AND " + Cargo.getFluentByIndex(this.at_cargo_airport)
+					+ " --> "
+					+ Cargo.getFluentByIndex(this.in_plane_cargo);
 		}
+
+		@Override
+		public ArrayList<Integer> getPreconditions() {
+			return preconditions;
+		}
+
+		@Override
+		public ArrayList<Integer> getNegative_effects() {
+			return negative_effects;
+		}
+
+		@Override
+		public ArrayList<Integer> getPositive_effects() {
+			return positive_effects;
+		}
+
 	}
 
 	public static class UnloadCargoAction extends CargoAction {
 
-		private final String cargo;
-		private final String airport;
-		private final String plane;
+		int at_plane_airport;
+		int in_plane_cargo;
+		int at_cargo_airport;
 
-		public UnloadCargoAction(String cargo, String airport, String plane) {
-			this.cargo = cargo;
-			this.airport = airport;
-			this.plane = plane;
-		}
+		ArrayList<Integer> preconditions = new ArrayList<Integer>();
+		ArrayList<Integer> negative_effects = new ArrayList<Integer>();
+		ArrayList<Integer> positive_effects = new ArrayList<Integer>();
 
-		public String getCargo() {
-			return cargo;
-		}
+		public UnloadCargoAction(int at_plane_airport, int in_plane_cargo, int at_cargo_airport) {
 
-		public String getAirport() {
-			return airport;
-		}
+			preconditions.add(at_plane_airport);
+			preconditions.add(in_plane_cargo);
 
-		public String getPlane() {
-			return plane;
+			negative_effects.add(in_plane_cargo);
+			positive_effects.add(at_cargo_airport);
+
+			this.at_plane_airport = at_plane_airport;
+			this.in_plane_cargo = in_plane_cargo;
+			this.at_cargo_airport = at_cargo_airport;
 		}
 
 		@Override
@@ -123,7 +151,24 @@ public abstract class CargoAction extends Action {
 
 		@Override
 		public String toString() {
-			return String.format("UnloadCargoAction %s at %s from plane %s", cargo, airport, plane);
+			return Cargo.getFluentByIndex(this.at_plane_airport) + "AND " + Cargo.getFluentByIndex(this.in_plane_cargo)
+					+ " --> "
+					+ Cargo.getFluentByIndex(this.at_cargo_airport);
+		}
+
+		@Override
+		public ArrayList<Integer> getPreconditions() {
+			return preconditions;
+		}
+
+		@Override
+		public ArrayList<Integer> getNegative_effects() {
+			return negative_effects;
+		}
+
+		@Override
+		public ArrayList<Integer> getPositive_effects() {
+			return positive_effects;
 		}
 	}
 
@@ -133,35 +178,16 @@ public abstract class CargoAction extends Action {
 		private static ArrayList<LoadCargoAction> loadActions = new ArrayList<>();
 		private static ArrayList<UnloadCargoAction> unloadActions = new ArrayList<>();
 
-		public static void initializeActions(String[] airports, String[] cargoes, String[] planes) {
+		public static void addFlyCargoAction(int at_plane_airport_1, int at_plane_airport_2) {
+			flyActions.add(new FlyCargoAction(at_plane_airport_1, at_plane_airport_2));
+		}
 
-			// Initialize all possibel FlyCargoActions
-			for (String plane : planes) {
-				for (String airport_from : airports) {
-					for (String airport_to : airports) {
-						if (airport_to != airport_from) {
-							flyActions.add(new FlyCargoAction(airport_from, airport_to, plane));
-						}
-					}
-				}
-			}
+		public static void addLoadAction(int at_plane_airport, int at_cargo_airport, int in_plane_cargo) {
+			loadActions.add(new LoadCargoAction(at_plane_airport, at_cargo_airport, in_plane_cargo));
+		}
 
-			// Initialize all possibel LoadCargoActions
-			for (String plane : planes) {
-				for (String cargo : cargoes) {
-					for (String airport : airports) {
-						loadActions.add(new LoadCargoAction(cargo, airport, plane));
-					}
-				}
-			}
-			// Initialize all possibel UnLoadCargoActions
-			for (String plane : planes) {
-				for (String cargo : cargoes) {
-					for (String airport : airports) {
-						unloadActions.add(new UnloadCargoAction(cargo, airport, plane));
-					}
-				}
-			}
+		public static void addUnloadAction(int at_plane_airport, int in_plane_cargo, int at_cargo_airport) {
+			unloadActions.add(new UnloadCargoAction(at_plane_airport, in_plane_cargo, at_cargo_airport));
 		}
 
 		public static ArrayList<FlyCargoAction> getFlyActions() {
@@ -175,5 +201,6 @@ public abstract class CargoAction extends Action {
 		public static ArrayList<UnloadCargoAction> getUnloadActions() {
 			return unloadActions;
 		}
+
 	}
 }
