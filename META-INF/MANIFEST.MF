@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Archiver-Version: Plexus Archiver
+Created-By: Apache Maven
+Built-By: felix
+Build-Jdk: 17.0.12
+Main-Class: it.uniroma1.di.tmancini.teaching.ai.search.graphPlanner.Main
+

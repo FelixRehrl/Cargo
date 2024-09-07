@@ -21,6 +21,7 @@
 
   <modules>
     <module>Cargo</module>
+    <module>CargoGraphPlanner</module>
   </modules>
 
   <build>

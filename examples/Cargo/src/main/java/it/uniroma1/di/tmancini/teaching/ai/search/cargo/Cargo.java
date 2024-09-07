@@ -1,27 +1,21 @@
 package it.uniroma1.di.tmancini.teaching.ai.search.cargo;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.swing.text.html.HTMLDocument.HTMLReader.PreAction;
-
-import it.uniroma1.di.tmancini.teaching.ai.search.Action;
 import it.uniroma1.di.tmancini.teaching.ai.search.AstarExplorer;
 import it.uniroma1.di.tmancini.teaching.ai.search.BFSExplorer;
 import it.uniroma1.di.tmancini.teaching.ai.search.BestFirstGreedyExplorer;
 import it.uniroma1.di.tmancini.teaching.ai.search.DFSExplorer;
 import it.uniroma1.di.tmancini.teaching.ai.search.MinCostExplorer;
 import it.uniroma1.di.tmancini.teaching.ai.search.Problem;
+import it.uniroma1.di.tmancini.teaching.ai.search.Action;
 import it.uniroma1.di.tmancini.teaching.ai.search.SearchStateExplorer;
 import it.uniroma1.di.tmancini.teaching.ai.search.cargo.CargoAction.FlyCargoAction;
 import it.uniroma1.di.tmancini.teaching.ai.search.cargo.CargoAction.LoadCargoAction;
@@ -56,12 +50,8 @@ public class Cargo extends Problem implements Callable<Integer> {
 
         private Cargo.Heuristics h;
 
-        // A problem is defined by an unchanegable set of object ( planes, cargoes,
-        // airports )
-        //
-        //
-        private String[] cargoes;
         private String[] planes;
+        private String[] cargoes;
         private String[] airports;
 
         private ArrayList<String> at;
@@ -75,7 +65,7 @@ public class Cargo extends Problem implements Callable<Integer> {
 
         // Every
         private static ArrayList<String> predicates_verbose = new ArrayList<>();
-        private static HashMap<String, Integer> predicates_with_index_objects = new HashMap<>();
+        private HashMap<String, Integer> predicates_with_index_objects = new HashMap<>();
 
         public ArrayList<Integer> getGoal_fluents() {
                 return goal_fluents;
@@ -85,7 +75,7 @@ public class Cargo extends Problem implements Callable<Integer> {
          * @TODO: Get Initial State from File private Map<List<Integer>, List<String>>
          *        predicates;
          */
-        private void instaniate_problem() {
+        public void instaniate_problem() {
 
                 process_input();
 
@@ -134,7 +124,7 @@ public class Cargo extends Problem implements Callable<Integer> {
         }
 
         // For every pairs of airports and for every plane we have a fly action
-        private void initialize_fly_actions() {
+        public void initialize_fly_actions() {
 
                 for (int i = 0; i < planes.length * airports.length - 1; i++) {
 
@@ -147,7 +137,7 @@ public class Cargo extends Problem implements Callable<Integer> {
 
         }
 
-        private void initialize_load_and_unload_actions() {
+        public void initialize_load_and_unload_actions() {
 
                 int cargo_in_offset = planes.length * airports.length;
                 int cargo_in_fluents_size = cargoes.length * planes.length;
@@ -435,5 +425,13 @@ public class Cargo extends Problem implements Callable<Integer> {
 
         public static String getFluentByIndex(int index) {
                 return predicates_verbose.get(index);
+        }
+
+        public static ArrayList<String> get_predicates_verbose() {
+                return predicates_verbose;
+        }
+
+        public HashMap<String, Integer> get_predicates_with_index_objects() {
+                return this.predicates_with_index_objects;
         }
 }

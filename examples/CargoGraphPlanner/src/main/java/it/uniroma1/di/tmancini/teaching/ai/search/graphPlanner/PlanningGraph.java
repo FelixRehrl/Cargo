@@ -1,4 +1,9 @@
-package it.uniroma1.di.tmancini.teaching.ai.search.cargo.cargoGraphPlanner;
+package it.uniroma1.di.tmancini.teaching.ai.search.cargo.graphPlanner;
+
+import it.uniroma1.di.tmancini.teaching.ai.search.cargo.Cargo;
+import it.uniroma1.di.tmancini.teaching.ai.search.cargo.CargoAction;
+import it.uniroma1.di.tmancini.teaching.ai.search.cargo.CargoState;
+import it.uniroma1.di.tmancini.teaching.ai.search.cargo.CargoFileParser;
 
 import java.util.*;
 
@@ -75,7 +80,7 @@ class Mutex {
         }
 }
 
-class PlanningGraph {
+public class PlanningGraph {
 
         List<Set<Proposition>> propositionLayers = new ArrayList<>();
         List<Set<Action>> actionLayers = new ArrayList<>();
@@ -158,29 +163,4 @@ class PlanningGraph {
                 }
         }
 
-        public static void main(String[] args) {
-                // Define propositions
-                Proposition p1 = new Proposition("At(A)");
-                Proposition p2 = new Proposition("At(B)");
-                Proposition p3 = new Proposition("!At(A)");
-                Proposition p4 = new Proposition("!At(B)");
-
-                // Define actions
-                Set<Proposition> preconditions1 = new HashSet<>(Arrays.asList(p1));
-                Set<Proposition> effects1 = new HashSet<>(Arrays.asList(p2, p3));
-                Action action1 = new Action("MoveAtoB", preconditions1, effects1);
-
-                Set<Proposition> preconditions2 = new HashSet<>(Arrays.asList(p2));
-                Set<Proposition> effects2 = new HashSet<>(Arrays.asList(p1, p4));
-                Action action2 = new Action("MoveBtoA", preconditions2, effects2);
-
-                Set<Action> actions = new HashSet<>(Arrays.asList(action1, action2));
-
-                // Initial state
-                Set<Proposition> initialState = new HashSet<>(Arrays.asList(p1));
-
-                // Build the planning graph
-                PlanningGraph planningGraph = new PlanningGraph(initialState, actions, 3);
-                planningGraph.printPlanningGraph();
-        }
 }
