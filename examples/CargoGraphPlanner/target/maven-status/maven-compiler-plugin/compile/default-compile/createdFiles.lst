@@ -1,5 +1,5 @@
-it/uniroma1/di/tmancini/teaching/ai/search/cargo/graphPlanner/Action.class
-it/uniroma1/di/tmancini/teaching/ai/search/cargo/graphPlanner/PlanningGraph.class
-it/uniroma1/di/tmancini/teaching/ai/search/cargo/graphPlanner/Mutex.class
-it/uniroma1/di/tmancini/teaching/ai/search/cargo/graphPlanner/Proposition.class
+it/uniroma1/di/tmancini/teaching/ai/search/graphPlanner/Proposition.class
+it/uniroma1/di/tmancini/teaching/ai/search/graphPlanner/Mutex.class
+it/uniroma1/di/tmancini/teaching/ai/search/graphPlanner/PlanningGraph.class
 it/uniroma1/di/tmancini/teaching/ai/search/graphPlanner/Main.class
+it/uniroma1/di/tmancini/teaching/ai/search/graphPlanner/Action.class

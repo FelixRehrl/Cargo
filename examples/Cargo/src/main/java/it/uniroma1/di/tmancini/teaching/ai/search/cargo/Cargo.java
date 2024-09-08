@@ -1,5 +1,6 @@
 package it.uniroma1.di.tmancini.teaching.ai.search.cargo;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -75,9 +76,9 @@ public class Cargo extends Problem implements Callable<Integer> {
          * @TODO: Get Initial State from File private Map<List<Integer>, List<String>>
          *        predicates;
          */
-        public void instaniate_problem() {
+        public void instaniate_problem(String file_path) {
 
-                process_input();
+                process_input(file_path);
 
                 initialize_objects_map(planes, airports, cargoes);
                 initialize_state_index_to_fluent_map();
@@ -102,9 +103,9 @@ public class Cargo extends Problem implements Callable<Integer> {
         /**
          * @TODO: Get Problem From File input
          */
-        private void process_input() {
+        private void process_input(String filepath) {
 
-                CargoFileParser cfp = new CargoFileParser("data/" + file_path);
+                CargoFileParser cfp = new CargoFileParser("data/" + filepath);
 
                 planes = cfp.getPlanes();
                 airports = cfp.getAirports();
@@ -184,21 +185,21 @@ public class Cargo extends Problem implements Callable<Integer> {
                 for (int i = 0; i < planes.length; i++) {
                         for (int j = 0; j < airports.length; j++) {
                                 predicates_with_index_objects.put(planes[i] + airports[j], predicates_verbose.size());
-                                predicates_verbose.add("At(" + planes[i] + ", " + airports[j] + ") ");
+                                predicates_verbose.add("At(" + planes[i] + "," + airports[j] + ") ");
                         }
                 }
 
                 for (int i = 0; i < cargoes.length; i++) {
                         for (int j = 0; j < planes.length; j++) {
                                 predicates_with_index_objects.put(cargoes[i] + planes[j], predicates_verbose.size());
-                                predicates_verbose.add("In(" + cargoes[i] + ", " + planes[j] + ") ");
+                                predicates_verbose.add("In(" + cargoes[i] + "," + planes[j] + ") ");
                         }
                 }
 
                 for (int i = 0; i < cargoes.length; i++) {
                         for (int j = 0; j < airports.length; j++) {
                                 predicates_with_index_objects.put(cargoes[i] + airports[j], predicates_verbose.size());
-                                predicates_verbose.add("At(" + cargoes[i] + ", " + airports[j] + ") ");
+                                predicates_verbose.add("At(" + cargoes[i] + "," + airports[j] + ") ");
                         }
                 }
 
@@ -218,8 +219,7 @@ public class Cargo extends Problem implements Callable<Integer> {
         // 0 -> JFK; 1 -> HEATHROW etcc.
         private void initialize_objects_map(String[] planes, String[] airports, String[] cargoes) {
 
-                List<String> allObjects = Stream.of(planes, airports, cargoes)
-                                .flatMap(Arrays::stream)
+                List<String> allObjects = Stream.of(planes, airports, cargoes).flatMap(Arrays::stream)
                                 .collect(Collectors.toList());
 
                 for (int i = 0; i < allObjects.size(); i++) {
@@ -241,7 +241,7 @@ public class Cargo extends Problem implements Callable<Integer> {
         @Override
         public Integer call() {
                 try {
-                        instaniate_problem();
+                        instaniate_problem(this.file_path);
 
                         CargoState initialState = new CargoState(this, initial_state);
 
@@ -434,4 +434,23 @@ public class Cargo extends Problem implements Callable<Integer> {
         public HashMap<String, Integer> get_predicates_with_index_objects() {
                 return this.predicates_with_index_objects;
         }
+
+        public static List<String> getObjectsFromProposition(String proposition) {
+                String parts_string = proposition.replaceAll("(At|In)\\(", "").replaceAll("[(),\\s]", "");
+                String[] parts_splitted = parts_string.split(",");
+                return Arrays.asList(parts_splitted);
+
+        }
+
+        public ArrayList<String> get_initial_state_fluents() {
+                ArrayList<String> fluents = new ArrayList<>();
+                for (int i = 0; i < initial_state.length; i++) {
+                        if (initial_state[i] == 'T') {
+                                fluents.add(getFluentByIndex(i));
+
+                        }
+                }
+                return fluents;
+        }
+
 }

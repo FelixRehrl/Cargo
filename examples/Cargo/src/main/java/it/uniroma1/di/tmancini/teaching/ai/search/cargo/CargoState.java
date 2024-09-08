@@ -189,7 +189,13 @@ public class CargoState extends State {
 	}
 
 	public String toString() {
-		return new String(this.state);
+		StringBuilder sb = new StringBuilder("\n");
+		for (int i = 0; i < state.length; i++) {
+			if (state[i] == 'T') {
+				sb.append(Cargo.getFluentByIndex(i) + " ");
+			}
+		}
+		return sb.toString();
 	}
 
 	public char[] getState() {

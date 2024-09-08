@@ -1,9 +1,4 @@
-package it.uniroma1.di.tmancini.teaching.ai.search.cargo.graphPlanner;
-
-import it.uniroma1.di.tmancini.teaching.ai.search.cargo.Cargo;
-import it.uniroma1.di.tmancini.teaching.ai.search.cargo.CargoAction;
-import it.uniroma1.di.tmancini.teaching.ai.search.cargo.CargoState;
-import it.uniroma1.di.tmancini.teaching.ai.search.cargo.CargoFileParser;
+package it.uniroma1.di.tmancini.teaching.ai.search.graphPlanner;
 
 import java.util.*;
 
