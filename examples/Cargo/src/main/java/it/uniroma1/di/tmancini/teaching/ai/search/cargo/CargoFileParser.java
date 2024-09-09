@@ -43,7 +43,7 @@ public class CargoFileParser {
                         scanner.close();
 
                         // Print for debugging
-                        printParsedData();
+                        // printParsedData();
 
                 } catch (FileNotFoundException e) {
                         e.printStackTrace();
@@ -75,27 +75,22 @@ public class CargoFileParser {
 
         // Helper function to print the parsed data (for debugging)
         private void printParsedData() {
-                System.out.println("Planes: ");
                 for (String plane : planes) {
                         System.out.println(plane);
                 }
 
-                System.out.println("Airports: ");
                 for (String airport : airports) {
                         System.out.println(airport);
                 }
 
-                System.out.println("Cargoes: ");
                 for (String cargo : cargoes) {
                         System.out.println(cargo);
                 }
 
-                System.out.println("Initial State: ");
                 for (String state : initial_state) {
                         System.out.println(state);
                 }
 
-                System.out.println("Goal State: ");
                 for (String state : goal_state) {
                         System.out.println(state);
                 }

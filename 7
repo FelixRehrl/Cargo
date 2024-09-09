@@ -1,73 +1,183 @@
 package it.uniroma1.di.tmancini.teaching.ai.search.graphPlanner;
 
-import it.uniroma1.di.tmancini.teaching.ai.search.cargo.Cargo;
-import it.uniroma1.di.tmancini.teaching.ai.search.cargo.CargoAction;
-import it.uniroma1.di.tmancini.teaching.ai.search.cargo.CargoState;
-import it.uniroma1.di.tmancini.teaching.ai.search.cargo.CargoAction.FlyCargoAction;
-import it.uniroma1.di.tmancini.teaching.ai.search.cargo.CargoFileParser;
-
 import java.util.*;
-import java.util.concurrent.Callable;
 
-import picocli.CommandLine;
+import javax.swing.text.html.HTMLDocument.HTMLReader.PreAction;
 
-public class Main implements Callable {
+class Proposition {
+        String name;
 
-        @CommandLine.Option(names = { "-f",
-                        "--file" }, defaultValue = "NULL", description = "The file presenting the input data ( planes, airports, cargoes ) and the initial state")
-
-        private String file_path;
-
-        private String[] planes;
-        private String[] cargoes;
-        private String[] airports;
-
-        private ArrayList<String> initial_fluents;
-        private ArrayList<String> goal_fluents;
-        private ArrayList<Integer> goal_indexes;
-
-        private int state_size;
-
-        // Every
-        private static ArrayList<String> predicates_verbose = new ArrayList<>();
-
-        public static void main(String[] args) {
-
-                int exitCode = new CommandLine(new Main()).execute(args);
-
+        public Proposition(String name) {
+                this.name = name;
         }
 
         @Override
-        public Integer call() throws Exception {
-
-                intilize_cargo_problem();
-
-                return 1;
-                // Define propositions
-                // Define actions
-                // Set<Proposition> preconditions1 = new HashSet<>(Arrays.asList(p1));
-                // Set<Proposition> effects1 = new HashSet<>(Arrays.asList(p2, p3));
-                // Action action1 = new Action("MoveAtoB", preconditions1, effects1);
-                //
-                // Set<Proposition> preconditions2 = new HashSet<>(Arrays.asList(p2));
-                // Set<Proposition> effects2 = new HashSet<>(Arrays.asList(p1, p4));
-                // Action action2 = new Action("MoveBtoA", preconditions2, effects2);
-                //
-                // Set<Action> actions = new HashSet<>(Arrays.asList(action1, action2));
-                //
-                // // Initial state
-                // Set<Proposition> initialState = new HashSet<>(Arrays.asList(p1));
-                //
-                // // Build the planning graph
-                // PlanningGraph planningGraph = new PlanningGraph(initialState, actions, 3);
-                // planningGraph.printPlanningGraph();
+        public boolean equals(Object obj) {
+                if (this == obj)
+                        return true;
+                if (!(obj instanceof Proposition))
+                        return false;
+                Proposition p = (Proposition) obj;
+                return this.name.equals(p.name);
         }
 
-        private void intilize_cargo_problem() {
-                Cargo problem = new Cargo();
-                problem.instaniate_problem(this.file_path);
-                problem.initialize_fly_actions();
-                problem.initialize_load_and_unload_actions();
-
+        @Override
+        public int hashCode() {
+                return Objects.hash(name);
         }
+
+        @Override
+        public String toString() {
+                return name;
+        }
+
+        public boolean areOpposites(Proposition prop1) {
+                if (prop1.name == "!" + this.name || this.name == "!" + prop1.name) {
+                        return true;
+                }
+                return false;
+        }
+
+}
+
+class Action {
+
+        String name;
+        Set<Proposition> preconditions;
+        Set<Proposition> effects;
+
+        public Action(String name, Set<Proposition> preconditions, Set<Proposition> effects) {
+                this.name = name;
+                this.preconditions = preconditions;
+                this.effects = effects;
+        }
+
+        public boolean canBeApplied(Set<Proposition> currentState) {
+
+                return currentState.containsAll(preconditions);
+        }
+
+        @Override
+        public String toString() {
+                return name;
+        }
+
+        public Set<Proposition> getPreconditions() {
+                return preconditions;
+        }
+
+}
+
+class Mutex {
+        Set<Action> mutexActions = new HashSet<>();
+        Set<Proposition> mutexPropositions = new HashSet<>();
+
+        public void addActionMutex(Action a1, Action a2) {
+                mutexActions.add(a1);
+                mutexActions.add(a2);
+        }
+
+        public void addPropositionMutex(Proposition p1, Proposition p2) {
+                mutexPropositions.add(p1);
+                mutexPropositions.add(p2);
+        }
+
+        public boolean areActionsMutex(Action a1, Action a2) {
+                return mutexActions.contains(a1) && mutexActions.contains(a2);
+        }
+
+        public boolean arePropositionsMutex(Proposition p1, Proposition p2) {
+                return mutexPropositions.contains(p1) && mutexPropositions.contains(p2);
+        }
+}
+
+public class PlanningGraph {
+
+        List<Set<Proposition>> propositionLayers = new ArrayList<>();
+        List<Set<Action>> actionLayers = new ArrayList<>();
+        List<Mutex> mutexLayers = new ArrayList<>();
+
+        public PlanningGraph(Set<Proposition> initialState, Set<Action> actions, int depth) {
+                // Initialize with the initial state
+                Set<Proposition> currentPropositions = new HashSet<>(initialState);
+                propositionLayers.add(currentPropositions);
+
+                for (int i = 0; i < depth; i++) {
+                        Mutex mutexLayer = new Mutex();
+                        Set<Action> newActions = new HashSet<>();
+
+                        Set<Proposition> oldPropositions = propositionLayers.get(propositionLayers.size() - 1);
+                        Set<Proposition> newPropositions = new HashSet<>();
+                        newPropositions.addAll(oldPropositions);
+
+                        // Add applicable actions to the action layer
+                        for (Action action : actions) {
+                                if (action.canBeApplied(currentPropositions)) {
+                                        newActions.add(action);
+                                        newPropositions.addAll(action.effects);
+
+                                        // Check and add mutexes between actions
+                                        for (Action otherAction : newActions) {
+                                                if (action != otherAction && areActionsMutex(action, otherAction)) {
+                                                        mutexLayer.addActionMutex(action, otherAction);
+                                                }
+                                        }
+                                }
+                        }
+
+                        actionLayers.add(newActions);
+
+                        propositionLayers.add(newPropositions);
+
+                        mutexLayers.add(mutexLayer);
+
+                        currentPropositions = newPropositions;
+
+                        for (Proposition p1 : newPropositions) {
+                                for (Proposition p2 : newPropositions) {
+                                        if (!p1.equals(p2) && arePropositionsMutex(p1, p2)) {
+                                                mutexLayer.addPropositionMutex(p1, p2);
+                                        }
+                                }
+                        }
+
+                        if (oldPropositions == newPropositions || oldPropositions.size() == newPropositions.size()) {
+                                break;
+                        }
+                }
+        }
+
+        private boolean areActionsMutex(Action a1, Action a2) {
+                
+                if(inconsistent_effect(a1, a2) || interference(a1, a2) || competing_needs(a1, a2) {
+                        return true; 
+                }
+
+                return false; 
+                for (Proposition effect1 : a1.effects) {
+
+                        for (Proposition effect2 : a2.effects) {
+                                if (effect1.areOpposites(effect2)) {
+                                        return true; // Actions are mutex if they share an effect
+                                }
+                        }
+                }
+                return false;
+        }
+
+        private boolean arePropositionsMutex(Proposition p1, Proposition p2) {
+                return p1.name.equals("!" + p2.name) || p2.name.equals("!" + p1.name);
+        }
+
+        // Print the planning graph for visualization
+        public void printPlanningGraph() {
+                System.out.println("\n\nPlanning Graph:\n");
+                for (int i = 0; i < propositionLayers.size(); i++) {
+                        System.out.println("Layer " + i + " - Propositions: " + propositionLayers.get(i) + "\n");
+                        // if (i < actionLayers.size()) {
+                        // System.out.println("Layer " + i + " - Actions: " + actionLayers.get(i));
+                        // }
+                }
+        }
+
 }

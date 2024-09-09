@@ -17,9 +17,8 @@ public class Main implements Callable {
         private String file_path;
 
         private Cargo problem;
-        private ArrayList<String> initial_fluents;
 
-        private static ArrayList<String> predicates_verbose = new ArrayList<>();
+        private static ArrayList<String> all_propositions = new ArrayList<>();
 
         public static void main(String[] args) {
 
@@ -35,17 +34,30 @@ public class Main implements Callable {
                 Set<Action> actions = create_graph_planning_actions();
                 Set<Proposition> initial_state = get_initial_state_propositions();
 
-                System.out.println(actions);
-                System.out.println(initial_state);
-
-                PlanningGraph planningGraph = new PlanningGraph(initial_state, actions, 3);
+                PlanningGraph planningGraph = new PlanningGraph(initial_state, actions, 50);
                 planningGraph.printPlanningGraph();
+
+                Set<Proposition> goal = get_goal_state_propositions();
+
+                int hLevel = planningGraph.hLevel(goal);
+
+                System.out.println("\n\n hLevel: " + hLevel);
 
                 return 1;
         }
 
         private Set<Proposition> get_initial_state_propositions() {
+
                 ArrayList<String> props_string = this.problem.get_initial_state_fluents();
+                Set<Proposition> props = props_string.stream().map(string -> new Proposition(string))
+                                .collect(Collectors.toSet());
+                return props;
+        }
+
+        private Set<Proposition> get_goal_state_propositions() {
+
+                ArrayList<String> props_string = this.problem.get_goal_fluents_as_strings();
+
                 Set<Proposition> props = props_string.stream().map(string -> new Proposition(string))
                                 .collect(Collectors.toSet());
                 return props;
@@ -74,12 +86,45 @@ public class Main implements Callable {
                         }
 
                         for (String pos_effect : cargoAction.getStringPositiveEffects()) {
-                                preconditions.add(new Proposition(pos_effect));
+                                effects.add(new Proposition(pos_effect));
                         }
 
                         actions.add(new Action(cargoAction.toString(), preconditions, effects));
                 }
+
+                Set<Action> persistent_actions = create_persistent_actions();
+                actions.addAll(persistent_actions);
+
                 return actions;
+        }
+
+        private Set<Action> create_persistent_actions() {
+
+                Set<Action> actions = new HashSet<>();
+
+                for (String prop : all_propositions) {
+                        ArrayList<Proposition> preconditions = new ArrayList<Proposition>();
+                        ArrayList<Proposition> effects = new ArrayList<Proposition>();
+
+                        preconditions.add(new Proposition(prop));
+                        preconditions.add(new Proposition("!" + prop));
+                        effects.add(new Proposition(prop));
+                        effects.add(new Proposition("!" + prop));
+
+                        for (int i = 0; i < preconditions.size(); i++) {
+
+                                Set<Proposition> prec = new HashSet<>();
+                                prec.add(preconditions.get(i));
+                                Set<Proposition> eff = new HashSet<>();
+                                prec.add(effects.get(i));
+
+                                actions.add(new Action((i % 2 == 0 ? "" : "!") + prop + "_persistent", prec, eff));
+
+                        }
+
+                }
+                return actions;
+
         }
 
         private void intilize_cargo_problem() {
@@ -87,6 +132,6 @@ public class Main implements Callable {
                 problem.instaniate_problem(this.file_path);
                 problem.initialize_fly_actions();
                 problem.initialize_load_and_unload_actions();
-
+                all_propositions = problem.get_predicates_verbose();
         }
 }

@@ -185,21 +185,21 @@ public class Cargo extends Problem implements Callable<Integer> {
                 for (int i = 0; i < planes.length; i++) {
                         for (int j = 0; j < airports.length; j++) {
                                 predicates_with_index_objects.put(planes[i] + airports[j], predicates_verbose.size());
-                                predicates_verbose.add("At(" + planes[i] + "," + airports[j] + ") ");
+                                predicates_verbose.add("At(" + planes[i] + "," + airports[j] + ")");
                         }
                 }
 
                 for (int i = 0; i < cargoes.length; i++) {
                         for (int j = 0; j < planes.length; j++) {
                                 predicates_with_index_objects.put(cargoes[i] + planes[j], predicates_verbose.size());
-                                predicates_verbose.add("In(" + cargoes[i] + "," + planes[j] + ") ");
+                                predicates_verbose.add("In(" + cargoes[i] + "," + planes[j] + ")");
                         }
                 }
 
                 for (int i = 0; i < cargoes.length; i++) {
                         for (int j = 0; j < airports.length; j++) {
                                 predicates_with_index_objects.put(cargoes[i] + airports[j], predicates_verbose.size());
-                                predicates_verbose.add("At(" + cargoes[i] + "," + airports[j] + ") ");
+                                predicates_verbose.add("At(" + cargoes[i] + "," + airports[j] + ")");
                         }
                 }
 
@@ -427,7 +427,7 @@ public class Cargo extends Problem implements Callable<Integer> {
                 return predicates_verbose.get(index);
         }
 
-        public static ArrayList<String> get_predicates_verbose() {
+        public ArrayList<String> get_predicates_verbose() {
                 return predicates_verbose;
         }
 
@@ -436,7 +436,7 @@ public class Cargo extends Problem implements Callable<Integer> {
         }
 
         public static List<String> getObjectsFromProposition(String proposition) {
-                String parts_string = proposition.replaceAll("(At|In)\\(", "").replaceAll("[(),\\s]", "");
+                String parts_string = proposition.replaceAll("(At|In)\\(", "").replaceAll("[()\\s]", "");
                 String[] parts_splitted = parts_string.split(",");
                 return Arrays.asList(parts_splitted);
 
@@ -448,7 +448,17 @@ public class Cargo extends Problem implements Callable<Integer> {
                         if (initial_state[i] == 'T') {
                                 fluents.add(getFluentByIndex(i));
 
+                        } else {
+                                fluents.add("!" + getFluentByIndex(i));
                         }
+                }
+                return fluents;
+        }
+
+        public ArrayList<String> get_goal_fluents_as_strings() {
+                ArrayList<String> fluents = new ArrayList<>();
+                for (Integer i : getGoal_fluents()) {
+                        fluents.add(getFluentByIndex(i));
                 }
                 return fluents;
         }

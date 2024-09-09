@@ -49,6 +49,7 @@ public abstract class CargoAction extends Action {
 
 			this.at_plane_airport_1 = at_plane_airport_1;
 			this.at_plane_airport_2 = at_plane_airport_2;
+
 			this.plane = Cargo.getObjectsFromProposition(Cargo.getFluentByIndex(at_plane_airport_1)).get(0);
 			this.airport_dest = Cargo.getObjectsFromProposition(Cargo.getFluentByIndex(at_plane_airport_2)).get(1);
 		}
