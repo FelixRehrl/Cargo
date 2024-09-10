@@ -1,6 +1,6 @@
 # Air Cargo Problem 
 
-An implementation of the famous planning problem in Java. This project includes a solution via forward search using a searchstate explorer created by Marco Esposito (author) - esposito@di.uniroma1.it, Providing the following search algorithms: 
+1. An implementation of the famous planning problem in Java. This project includes a solution via forward search using a searchstate explorer created by Marco Esposito (author) - esposito@di.uniroma1.it, Providing the following search algorithms: 
 
 - Depth-First Search,
 - Breadth-First Search,
@@ -8,7 +8,7 @@ An implementation of the famous planning problem in Java. This project includes 
 - Best First Greedy,
 - A*.
 
-Additionally the project includes the implementation of an entire Planning Graph and caculation of the hLevel heursitic. 
+2. Implementation of the Planning Graph Algorithm in Java and calculation of the hLevel heuristic. 
 
 The user can choose between four different instances to be solved by either forward search or by creating the relative Planning Graph
 
@@ -79,14 +79,14 @@ For the file-inputs the basename of the file is used to calculate the path, e.g.
 
 Run example:
 
-`java -jar examples/Cargo/target/Cargo.jar --algorithms="BFG,A*:MANHATTAN  --file={ first_instance.txt, second_instance.txt, third_instance.txt, fourth_instance.txt }"
+`java -jar examples/Cargo/target/Cargo.jar --algorithms=BFG,A*:MANHATTAN  --file={ first_instance.txt, second_instance.txt, third_instance.txt, fourth_instance.txt }
 `
 
 ### CargoGraphPlanner
 
 Run example:
 
-`java -jar examples/CargoGraphPlanner/target/CargoGraphPlanner.jar --file={ first_instance.txt, second_instance.txt, third_instance.txt, fourth_instance.txt }"
+`java -jar examples/CargoGraphPlanner/target/CargoGraphPlanner.jar --file={ first_instance.txt, second_instance.txt, third_instance.txt, fourth_instance.txt }
 `
 
 ## Maven cheat sheet
