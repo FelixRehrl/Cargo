@@ -38,9 +38,9 @@ _(These instructions have been tested on Ubuntu 20.10)_
 
 Clone this repository in a local directory using command
 
-`git clone git@bitbucket.org:mclab/searchstateexplorer.git`
+`git clone https://github.com/FelixRehrl/Cargo.git`
 
-Let `{BASEDIR}` the directory where the repository has been cloned (the one that contains the `doc/` directory).
+Let `{BASEDIR}` the directory where the repository has been cloned.
 
 Move inside the directory:
 
