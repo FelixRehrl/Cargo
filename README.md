@@ -1,12 +1,22 @@
-# SearchStateExplorer
+# Air Cargo Problem 
 
-A search framework written in Java. It implements the following algorithms:
+An implementation of the famous planning problem in Java. This project includes a solution via forward search using a searchstate explorer created by Marco Esposito (author) - esposito@di.uniroma1.it, Providing the following search algorithms: 
 
 - Depth-First Search,
 - Breadth-First Search,
 - Min-Cost,
 - Best First Greedy,
 - A*.
+
+Additionally the project includes the implementation of an entire Planning Graph and caculation of the hLevel heursitic. 
+
+The user can choose between four different instances to be solved by either forward search or by creating the relative Planning Graph
+
+`{BASEDIR}/data/first_instance.txt`
+`{BASEDIR}/data/second_instance.txt`
+`{BASEDIR}/data/third_instance.txt`
+`{BASEDIR}/data/fourth_instance.txt`
+
 
 ## Requirements
 
@@ -48,9 +58,8 @@ The build process generates several JAR files:
 
 * the framework JAR, which is used by all examples and, in general, by any application using the framework: ``{BASEDIR}/searchstateexplorer-framework/target/searchstateexplorer-framework.jar``;
 * an _executable_ JAR for each example in `{BASEDIR}/examples/`:
-    * _Puzzle_ example: `{BASEDIR}/examples/Puzzle/target/Puzzle.jar`,
-    * _Vacuum_ example: `{BASEDIR}/examples/Vacuum/target/Vacuum.jar`,
-    * _Protein Folding_ exercise: `{BASEDIR}/examples/ProteinFolding/target/ProteinFolding.jar`.
+    * _Cargo_ example: `{BASEDIR}/examples/Cargo/target/Cargo.jar`,
+    * _CargoPlanningGraph_ example: `{BASEDIR}/examples/CargoGraphPlanner/target/CargoGraphPlanner.jar`,
 
 ## Running Examples
 
@@ -64,23 +73,21 @@ For each example `{EXAMPLE}`, running
 
 will display the help for command-line options.
 
-### Puzzle
+For the file-inputs the basename of the file is used to calculate the path, e.g. ( first_instance.txt ) 
+
+### Cargo
 
 Run example:
 
-`java -jar examples/Puzzle/target/Puzzle.jar --size 3 --solvableOnly --algorithms="BFG,A*:MANHATTAN"
+`java -jar examples/Cargo/target/Cargo.jar --algorithms="BFG,A*:MANHATTAN  --file={ first_instance.txt, second_instance.txt, third_instance.txt, fourth_instance.txt }"
 `
 
-### Vacuum
+### CargoGraphPlanner
 
 Run example:
 
-`java -jar examples/Vacuum/target/Vacuum.jar --sizeX 3 --sizeY 3 --algorithms="A*" --maxdepth 30`
-
-### Protein Folding
-
-This is left as an exercise, hence running the JAR will result in `NotImplementedException`s being thrown.
-
+`java -jar examples/CargoGraphPlanner/target/CargoGraphPlanner.jar --file={ first_instance.txt, second_instance.txt, third_instance.txt, fourth_instance.txt }"
+`
 
 ## Maven cheat sheet
 
@@ -105,18 +112,5 @@ Note that `verify` also builds the JARs.
 For more info, visit the [Maven quick start guide](https://maven.apache.org/guides/getting-started/maven-in-five-minutes.html).
 
 
-## Implementing applications based on SearchStateExplorer
-
-If you want to implement an application based on the SearchStateExplorer framework, you have two options:
-
-1. Create a "classic" application, which needs to have `searchstateexplorer-framework.jar` on its `CLASSPATH`;
-2. Create an application based on Maven. The easiest way to do so is to mimic the examples. This boils down to:
-    1. setting up a directory structure analogous to the one of, e.g., _Puzzle_ (**This is very important**, since Maven is built on the concept of _convention over configuration_, so it exploits the directory structure in the building process).
-    2. Setting `searchstateexplorer-framework` as a _dependency_ in the `pom.xml` file in the root of your application.
-    3. Edit the `pom.xml` file to configure your building process.
     
-## Who do I talk to?
 
-For support or collaboration, contact:
-
-* Marco Esposito (author) - esposito@di.uniroma1.it

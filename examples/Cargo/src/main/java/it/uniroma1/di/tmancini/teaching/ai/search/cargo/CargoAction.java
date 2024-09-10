@@ -5,15 +5,78 @@ import java.util.stream.Collectors;
 
 import it.uniroma1.di.tmancini.teaching.ai.search.*;
 
+/**
+ * Represent an abstract CargoAction. This class is extended by the three
+ * classes representing the three possible actions of the problem (
+ * FlyCargoAction, LoadCargoAction, UnloadCargoAction )
+ */
 public abstract class CargoAction extends Action {
 
 	public abstract double getCost();
 
-	public abstract ArrayList<String> getStringPreconditions();
+	/**
+	 * Like every action in a classical planning we define preconditions and
+	 * effects, again the Integers in this case refert to the index of the
+	 * respecitve
+	 * fluent in the state which can either be true or false ( TTTFFTFTFTFT )
+	 *
+	 */
+	// ArrayList<Integer> preconditions = new ArrayList<Integer>();
+	// ArrayList<Integer> negative_effects = new ArrayList<Integer>();
+	// ArrayList<Integer> positive_effects = new ArrayList<Integer>();
+	//
+	protected ArrayList<Integer> preconditions = new ArrayList<Integer>();
+	protected ArrayList<Integer> negative_effects = new ArrayList<Integer>();
+	protected ArrayList<Integer> positive_effects = new ArrayList<Integer>();
 
-	public abstract ArrayList<String> getStringNegativeEffects();
+	@Override
+	public ArrayList<Integer> getPreconditions() {
+		return preconditions;
+	}
 
-	public abstract ArrayList<String> getStringPositiveEffects();
+	@Override
+	public ArrayList<Integer> getNegative_effects() {
+		return negative_effects;
+	}
+
+	@Override
+	public ArrayList<Integer> getPositive_effects() {
+		return positive_effects;
+	}
+
+	/**
+	 * Converts the index-based preconditions into a list of strings ( 1, 2, 3 ) ->
+	 * ( AT(CARGO_1, JFK); IN(CARGO_1, PLANE) ) .
+	 * 
+	 * @return a list of preconditions as strings.
+	 */
+	public ArrayList<String> getStringPreconditions() {
+		return this.preconditions.stream()
+				.map(index -> Cargo.getFluentByIndex(index))
+				.collect(Collectors.toCollection(ArrayList::new));
+	}
+
+	/**
+	 * Converts the index-based negative effects into a list of strings.
+	 * 
+	 * @return a list of negative effects as strings.
+	 */
+	public ArrayList<String> getStringNegativeEffects() {
+		return this.negative_effects.stream()
+				.map(index -> "!" + Cargo.getFluentByIndex(index))
+				.collect(Collectors.toCollection(ArrayList::new));
+	}
+
+	/**
+	 * Converts the index-based positive effects into a list of strings.
+	 * 
+	 * @return a list of positive effects as strings.
+	 */
+	public ArrayList<String> getStringPositiveEffects() {
+		return this.positive_effects.stream()
+				.map(index -> Cargo.getFluentByIndex(index))
+				.collect(Collectors.toCollection(ArrayList::new));
+	}
 
 	@Override
 	public boolean equals(Object o) {
@@ -32,14 +95,8 @@ public abstract class CargoAction extends Action {
 
 	public static class FlyCargoAction extends CargoAction {
 
-		int at_plane_airport_1;
-		int at_plane_airport_2;
 		String plane;
 		String airport_dest;
-
-		ArrayList<Integer> preconditions = new ArrayList<Integer>();
-		ArrayList<Integer> negative_effects = new ArrayList<Integer>();
-		ArrayList<Integer> positive_effects = new ArrayList<Integer>();
 
 		public FlyCargoAction(int at_plane_airport_1, int at_plane_airport_2) {
 
@@ -47,9 +104,7 @@ public abstract class CargoAction extends Action {
 			this.negative_effects.add(at_plane_airport_1);
 			this.positive_effects.add(at_plane_airport_2);
 
-			this.at_plane_airport_1 = at_plane_airport_1;
-			this.at_plane_airport_2 = at_plane_airport_2;
-
+			// Get the name of plane and airport for printing
 			this.plane = Cargo.getObjectsFromProposition(Cargo.getFluentByIndex(at_plane_airport_1)).get(0);
 			this.airport_dest = Cargo.getObjectsFromProposition(Cargo.getFluentByIndex(at_plane_airport_2)).get(1);
 		}
@@ -59,61 +114,18 @@ public abstract class CargoAction extends Action {
 			return 1;
 		}
 
-		// @TODO: Implement Actionskj:w
-		//
 		@Override
 		public String toString() {
 			return " FLY(" + this.plane + "," + this.airport_dest + ")";
-		}
-
-		@Override
-		public ArrayList<Integer> getPreconditions() {
-			return preconditions;
-		}
-
-		@Override
-		public ArrayList<Integer> getNegative_effects() {
-			return negative_effects;
-		}
-
-		@Override
-		public ArrayList<Integer> getPositive_effects() {
-			return positive_effects;
-		}
-
-		@Override
-		public ArrayList<String> getStringPreconditions() {
-			return this.preconditions.stream().map(index -> Cargo.getFluentByIndex(index))
-					.collect(Collectors.toCollection(ArrayList::new));
-		}
-
-		@Override
-		public ArrayList<String> getStringNegativeEffects() {
-			return this.negative_effects.stream().map(index -> "!" + Cargo.getFluentByIndex(index))
-					.collect(Collectors.toCollection(ArrayList::new));
-		}
-
-		@Override
-		public ArrayList<String> getStringPositiveEffects() {
-			return this.positive_effects.stream().map(index -> Cargo.getFluentByIndex(index))
-					.collect(Collectors.toCollection(ArrayList::new));
 		}
 
 	}
 
 	public static class LoadCargoAction extends CargoAction {
 
-		int at_plane_airport;
-		int at_cargo_airport;
-		int in_plane_cargo;
-
 		String cargo;
 		String plane;
 		String airport;
-
-		ArrayList<Integer> preconditions = new ArrayList<Integer>();
-		ArrayList<Integer> negative_effects = new ArrayList<Integer>();
-		ArrayList<Integer> positive_effects = new ArrayList<Integer>();
 
 		public LoadCargoAction(int at_plane_airport, int at_cargo_airport, int in_plane_cargo) {
 
@@ -124,10 +136,7 @@ public abstract class CargoAction extends Action {
 
 			positive_effects.add(in_plane_cargo);
 
-			this.at_plane_airport = at_plane_airport;
-			this.at_cargo_airport = at_cargo_airport;
-			this.in_plane_cargo = in_plane_cargo;
-
+			// Get name of objects for toString()
 			this.plane = Cargo.getObjectsFromProposition(Cargo.getFluentByIndex(in_plane_cargo)).get(1);
 			this.cargo = Cargo.getObjectsFromProposition(Cargo.getFluentByIndex(in_plane_cargo)).get(0);
 			this.airport = Cargo.getObjectsFromProposition(Cargo.getFluentByIndex(at_plane_airport)).get(1);
@@ -144,54 +153,13 @@ public abstract class CargoAction extends Action {
 			return " LOAD(" + this.cargo + "," + this.plane + ")\t AT[" + this.airport + "]";
 		}
 
-		@Override
-		public ArrayList<Integer> getPreconditions() {
-			return preconditions;
-		}
-
-		@Override
-		public ArrayList<Integer> getNegative_effects() {
-			return negative_effects;
-		}
-
-		@Override
-		public ArrayList<Integer> getPositive_effects() {
-			return positive_effects;
-		}
-
-		@Override
-		public ArrayList<String> getStringPreconditions() {
-			return this.preconditions.stream().map(index -> Cargo.getFluentByIndex(index))
-					.collect(Collectors.toCollection(ArrayList::new));
-		}
-
-		@Override
-		public ArrayList<String> getStringNegativeEffects() {
-			return this.negative_effects.stream().map(index -> "!" + Cargo.getFluentByIndex(index))
-					.collect(Collectors.toCollection(ArrayList::new));
-		}
-
-		@Override
-		public ArrayList<String> getStringPositiveEffects() {
-			return this.positive_effects.stream().map(index -> Cargo.getFluentByIndex(index))
-					.collect(Collectors.toCollection(ArrayList::new));
-		}
-
 	}
 
 	public static class UnloadCargoAction extends CargoAction {
 
-		int at_plane_airport;
-		int in_plane_cargo;
-		int at_cargo_airport;
-
 		String cargo;
 		String plane;
 		String airport;
-
-		ArrayList<Integer> preconditions = new ArrayList<Integer>();
-		ArrayList<Integer> negative_effects = new ArrayList<Integer>();
-		ArrayList<Integer> positive_effects = new ArrayList<Integer>();
 
 		public UnloadCargoAction(int at_plane_airport, int in_plane_cargo, int at_cargo_airport) {
 
@@ -201,10 +169,7 @@ public abstract class CargoAction extends Action {
 			negative_effects.add(in_plane_cargo);
 			positive_effects.add(at_cargo_airport);
 
-			this.at_plane_airport = at_plane_airport;
-			this.in_plane_cargo = in_plane_cargo;
-			this.at_cargo_airport = at_cargo_airport;
-
+			// Get name of objects for toString()
 			this.plane = Cargo.getObjectsFromProposition(Cargo.getFluentByIndex(in_plane_cargo)).get(1);
 			this.cargo = Cargo.getObjectsFromProposition(Cargo.getFluentByIndex(in_plane_cargo)).get(0);
 			this.airport = Cargo.getObjectsFromProposition(Cargo.getFluentByIndex(at_plane_airport)).get(1);
@@ -218,39 +183,6 @@ public abstract class CargoAction extends Action {
 		@Override
 		public String toString() {
 			return " UNLOAD(" + this.cargo + "," + this.plane + ")\t AT[" + this.airport + "]";
-		}
-
-		@Override
-		public ArrayList<Integer> getPreconditions() {
-			return preconditions;
-		}
-
-		@Override
-		public ArrayList<Integer> getNegative_effects() {
-			return negative_effects;
-		}
-
-		@Override
-		public ArrayList<Integer> getPositive_effects() {
-			return positive_effects;
-		}
-
-		@Override
-		public ArrayList<String> getStringPreconditions() {
-			return this.preconditions.stream().map(index -> Cargo.getFluentByIndex(index))
-					.collect(Collectors.toCollection(ArrayList::new));
-		}
-
-		@Override
-		public ArrayList<String> getStringNegativeEffects() {
-			return this.negative_effects.stream().map(index -> "!" + Cargo.getFluentByIndex(index))
-					.collect(Collectors.toCollection(ArrayList::new));
-		}
-
-		@Override
-		public ArrayList<String> getStringPositiveEffects() {
-			return this.positive_effects.stream().map(index -> Cargo.getFluentByIndex(index))
-					.collect(Collectors.toCollection(ArrayList::new));
 		}
 
 	}

@@ -18,15 +18,23 @@ import it.uniroma1.di.tmancini.teaching.ai.search.MinCostExplorer;
 import it.uniroma1.di.tmancini.teaching.ai.search.Problem;
 import it.uniroma1.di.tmancini.teaching.ai.search.Action;
 import it.uniroma1.di.tmancini.teaching.ai.search.SearchStateExplorer;
-import it.uniroma1.di.tmancini.teaching.ai.search.cargo.CargoAction.FlyCargoAction;
-import it.uniroma1.di.tmancini.teaching.ai.search.cargo.CargoAction.LoadCargoAction;
-import it.uniroma1.di.tmancini.teaching.ai.search.cargo.CargoAction.UnloadCargoAction;
 import picocli.CommandLine;
 
+/**
+ * Cargo is the main class that represents the cargo problem to be solved by
+ * different
+ * search algorithms (e.g., BFS, DFS, A*, etc.). It includes methods to
+ * initialize the problem,
+ * define the initial and goal states, and run the selected search algorithms.
+ */
 public class Cargo extends Problem implements Callable<Integer> {
 
         public static boolean debug = false;
 
+        /**
+         * Enum defining possible heuristics for the A* and Best First Greedy
+         * algorithms.
+         */
         public static enum Heuristics {
                 UNMET_GOALS
         }
@@ -45,12 +53,10 @@ public class Cargo extends Problem implements Callable<Integer> {
         private int vlevel;
 
         @CommandLine.Option(names = { "-f",
-                        "--file" }, defaultValue = "NULL", description = "The file presenting the input data ( planes, airports, cargoes ) and the initial state")
-
+                        "--file" }, defaultValue = "NULL", description = "The file presenting the input data (planes, airports, cargoes) and the initial state")
         private String file_path;
 
         private Cargo.Heuristics h;
-
         private String[] planes;
         private String[] cargoes;
         private String[] airports;
@@ -60,92 +66,90 @@ public class Cargo extends Problem implements Callable<Integer> {
         private ArrayList<Integer> goal_fluents;
 
         private HashMap<Integer, String> object_number_map = new HashMap<Integer, String>();
-
         private int state_size;
         private char[] initial_state;
 
-        // Every
         private static ArrayList<String> predicates_verbose = new ArrayList<>();
         private HashMap<String, Integer> predicates_with_index_objects = new HashMap<>();
 
-        public ArrayList<Integer> getGoal_fluents() {
-                return goal_fluents;
+        /**
+         * Initializes the cargo problem by reading input from the provided file,
+         * setting up the
+         * initial and goal states, and generating the available actions.
+         * 
+         * @param file_path The path of the file containing the problem description.
+         */
+        public void instaniate_problem(String file_path) {
+                process_input(file_path);
+                initialize_objects_map(planes, airports, cargoes);
+                initialize_state_index_to_fluent_map();
+                set_initial_state();
+                set_goal_state();
+                initialize_fly_actions();
+                initialize_load_and_unload_actions();
         }
 
         /**
-         * @TODO: Get Initial State from File private Map<List<Integer>, List<String>>
-         *        predicates;
+         * Sets the goal state by mapping the goal fluents from the input file to their
+         * corresponding
+         * indices in the predicates_with_index_objects map.
          */
-        public void instaniate_problem(String file_path) {
-
-                process_input(file_path);
-
-                initialize_objects_map(planes, airports, cargoes);
-                initialize_state_index_to_fluent_map();
-
-                set_initial_state();
-                set_goal_state();
-
-                initialize_fly_actions();
-                initialize_load_and_unload_actions();
-
-                if (debug) {
-                        print_cargo_actions();
-                }
-        }
-
         private void set_goal_state() {
-
                 goal_fluents = goal.stream().map(fluent -> predicates_with_index_objects.get(fluent))
                                 .collect(Collectors.toCollection(ArrayList::new));
         }
 
         /**
-         * @TODO: Get Problem From File input
+         * Processes the input file and extracts the planes, airports, cargoes, initial
+         * state,
+         * and goal state.
+         * 
+         * @param filepath The path of the input file containing the problem details.
          */
         private void process_input(String filepath) {
-
                 CargoFileParser cfp = new CargoFileParser("data/" + filepath);
-
                 planes = cfp.getPlanes();
                 airports = cfp.getAirports();
                 cargoes = cfp.getCargoes();
                 at = cfp.getInitial_state();
                 goal = cfp.getGoal_state();
-
         }
 
+        /**
+         * Sets the initial state by filling the state array with 'T' for true fluents
+         * and 'F'
+         * for false fluents based on the parsed initial state.
+         */
         private void set_initial_state() {
                 state_size = calculate_state_size(planes.length, airports.length, cargoes.length);
-
                 this.initial_state = new char[state_size];
                 Arrays.fill(this.initial_state, 'F');
-
                 at.stream().forEach(value -> this.initial_state[predicates_with_index_objects.get(value)] = 'T');
         }
 
-        // For every pairs of airports and for every plane we have a fly action
+        /**
+         * Initializes fly actions for every pair of airports and for every plane. Adds
+         * both directions of flights between pairs of airports.
+         */
         public void initialize_fly_actions() {
-
                 for (int i = 0; i < planes.length * airports.length - 1; i++) {
-
                         if (i > 0 && i - 1 % airports.length == 0) {
                                 i++;
                         }
                         CargoAction.CargoActionFactory.addFlyCargoAction(i, i + 1);
                         CargoAction.CargoActionFactory.addFlyCargoAction(i + 1, i);
                 }
-
         }
 
+        /**
+         * Initializes load and unload actions for each cargo at the corresponding
+         * airports and planes.
+         */
         public void initialize_load_and_unload_actions() {
-
                 int cargo_in_offset = planes.length * airports.length;
                 int cargo_in_fluents_size = cargoes.length * planes.length;
                 int at_cargo_airport_offset = cargo_in_offset + cargo_in_fluents_size;
 
-                // A plane can be in airport_offset airports; thus a cargo in that plane has to
-                // conincdie with that many airports and cargoes at ariport
                 int airport_offset = 0;
                 int cargoCounter = 0;
                 int cargo_airport_offset = 0;
@@ -174,81 +178,90 @@ public class Cargo extends Problem implements Callable<Integer> {
                                 cargo_airport_offset += airports.length;
                         }
                 }
-
         }
 
         /**
-         * 
+         *
+         * Initializes the state index to fluent map by associating each predicate with
+         * a unique index ( e.g. AT(CARGO_1, JKF) -> 2, IN(CARGO_2, PLANE_1) -> 3
+         * The number defines thee inexd of the this particular fluent within the state
+         * representation ( AT(CARGO_1, JFK ) is assoicated with the third position in
+         * the state
          */
         private void initialize_state_index_to_fluent_map() {
-
                 for (int i = 0; i < planes.length; i++) {
                         for (int j = 0; j < airports.length; j++) {
                                 predicates_with_index_objects.put(planes[i] + airports[j], predicates_verbose.size());
                                 predicates_verbose.add("At(" + planes[i] + "," + airports[j] + ")");
                         }
                 }
-
                 for (int i = 0; i < cargoes.length; i++) {
                         for (int j = 0; j < planes.length; j++) {
                                 predicates_with_index_objects.put(cargoes[i] + planes[j], predicates_verbose.size());
                                 predicates_verbose.add("In(" + cargoes[i] + "," + planes[j] + ")");
                         }
                 }
-
                 for (int i = 0; i < cargoes.length; i++) {
                         for (int j = 0; j < airports.length; j++) {
                                 predicates_with_index_objects.put(cargoes[i] + airports[j], predicates_verbose.size());
                                 predicates_verbose.add("At(" + cargoes[i] + "," + airports[j] + ")");
                         }
                 }
-
         }
 
         /**
-         * @param planes
-         * @param airports
-         * @param cargoes
-         * @return int
+         * Calculates the total state size based on the number of planes, airports, and
+         * cargoes.
+         * 
+         * @param planes   The number of planes.
+         * @param airports The number of airports.
+         * @param cargoes  The number of cargoes.
+         * @return The total size of the state.
          */
         private int calculate_state_size(int planes, int airports, int cargoes) {
                 return cargoes * (planes + airports) + planes * airports;
         }
 
-        // Initializeze the Hashamp that assigns every obeject a unique interger
-        // 0 -> JFK; 1 -> HEATHROW etcc.
+        /**
+         * Initializes the objects map which assigns a unique index to each object
+         * (planes, airports, cargoes).
+         * 
+         * @param planes   An array of planes.
+         * @param airports An array of airports.
+         * @param cargoes  An array of cargoes.
+         */
         private void initialize_objects_map(String[] planes, String[] airports, String[] cargoes) {
-
                 List<String> allObjects = Stream.of(planes, airports, cargoes).flatMap(Arrays::stream)
                                 .collect(Collectors.toList());
 
                 for (int i = 0; i < allObjects.size(); i++) {
                         object_number_map.put(i, allObjects.get(i));
-
                 }
         }
 
-        public boolean isGoal(Map<String, String> state) {
-                return true;
-        }
-
+        /**
+         * Default constructor for Cargo class, which initializes the problem with the
+         * name "Cargo".
+         */
         public Cargo() {
-
                 super("Cargo");
-
         }
 
+        /**
+         * The main method for the Cargo class. This method reads the input, initializes
+         * the problem,
+         * and runs the specified search algorithms to find the solution.
+         * 
+         * @return Exit status of the program.
+         */
         @Override
         public Integer call() {
                 try {
                         instaniate_problem(this.file_path);
-
                         CargoState initialState = new CargoState(this, initial_state);
-
                         System.out.println("[INFO]  Initial state: " + initialState);
 
                         SearchStateExplorer explorer;
-
                         for (String algo : algos) {
                                 List<String> algoAndSetting = getAlgorithmAndHeuristics(algo);
                                 String algorithm = algoAndSetting.get(0);
@@ -290,10 +303,6 @@ public class Cargo extends Problem implements Callable<Integer> {
                                 System.out.println("\n\n\n===================\n\nAlgorithm " + explorer +
                                                 (setting != null ? " (" + setting + ")" : "") + " started");
 
-                                // if (debug) {
-                                // return 1;
-                                // }
-
                                 List<Action> result = explorer.run(initialState);
 
                                 System.out.println("Algorithm " + explorer + " terminated.");
@@ -322,6 +331,12 @@ public class Cargo extends Problem implements Callable<Integer> {
                 }
         }
 
+        /**
+         * Parses the algorithm and heuristics from the given algorithm string.
+         * 
+         * @param algo The algorithm string (e.g., "A*:UNMET_GOALS").
+         * @return A list containing the algorithm name and optional heuristic.
+         */
         private List<String> getAlgorithmAndHeuristics(String algo) {
                 List<String> algoAndSetting = Arrays.asList(algo.split(":"));
                 List<String> result = new ArrayList<>();
@@ -329,10 +344,6 @@ public class Cargo extends Problem implements Callable<Integer> {
                 if (algoAndSetting.size() > 1)
                         result.add(algoAndSetting.get(1).trim());
                 return result;
-        }
-
-        public static boolean hasHeuristics(String test) {
-                return true;
         }
 
         public Heuristics getHeuristics() {
@@ -347,6 +358,9 @@ public class Cargo extends Problem implements Callable<Integer> {
                 this.h = null;
         }
 
+        /**
+         * Prints the header information to the console before execution begins.
+         */
         private static void printOutputHeader() {
                 System.out.println("\n======================================================" +
                                 "=\n=\t\tSearchStateExplorer\t\t      =\n" +
@@ -355,6 +369,13 @@ public class Cargo extends Problem implements Callable<Integer> {
                                 "=======================================================\n");
         }
 
+        /**
+         * The main entry point for the Cargo problem execution. It parses the
+         * command-line arguments,
+         * initializes the problem, and runs the specified search algorithms.
+         * 
+         * @param args Command-line arguments.
+         */
         public static void main(String[] args) {
                 printOutputHeader();
                 int exitCode = new CommandLine(new Cargo()).execute(args);
@@ -411,18 +432,12 @@ public class Cargo extends Problem implements Callable<Integer> {
                 this.airports = airports;
         }
 
-        private void print_cargo_actions() {
-
-                ArrayList<FlyCargoAction> flyActions = CargoAction.CargoActionFactory.getFlyActions();
-                ArrayList<UnloadCargoAction> unloadActions = CargoAction.CargoActionFactory.getUnloadActions();
-                ArrayList<LoadCargoAction> loadActions = CargoAction.CargoActionFactory.getLoadActions();
-                System.out.println(predicates_with_index_objects);
-
-                System.out.println(flyActions + "\n\n");
-                System.out.println(unloadActions + "\n\n");
-                System.out.println(loadActions + "\n\n");
-        }
-
+        /**
+         * Returns the fluent at the given index as a string.
+         * 
+         * @param index The index of the fluent.
+         * @return The fluent as a string.
+         */
         public static String getFluentByIndex(int index) {
                 return predicates_verbose.get(index);
         }
@@ -435,11 +450,16 @@ public class Cargo extends Problem implements Callable<Integer> {
                 return this.predicates_with_index_objects;
         }
 
+        /**
+         * Extracts and returns the list of objects from the given proposition string.
+         * 
+         * @param proposition The proposition string (e.g., "At(Plane1, JFK)").
+         * @return The objectsextracted from the proposition [ Plane1, JFK ].
+         */
         public static List<String> getObjectsFromProposition(String proposition) {
                 String parts_string = proposition.replaceAll("(At|In)\\(", "").replaceAll("[()\\s]", "");
                 String[] parts_splitted = parts_string.split(",");
                 return Arrays.asList(parts_splitted);
-
         }
 
         public ArrayList<String> get_initial_state_fluents() {
@@ -447,12 +467,20 @@ public class Cargo extends Problem implements Callable<Integer> {
                 for (int i = 0; i < initial_state.length; i++) {
                         if (initial_state[i] == 'T') {
                                 fluents.add(getFluentByIndex(i));
-
                         } else {
                                 fluents.add("!" + getFluentByIndex(i));
                         }
                 }
                 return fluents;
+        }
+
+        /**
+         * Returns the list of goal fluents (integers representing predicates).
+         * 
+         * @return ArrayList of goal fluents (integers).
+         */
+        public ArrayList<Integer> getGoal_fluents() {
+                return goal_fluents;
         }
 
         public ArrayList<String> get_goal_fluents_as_strings() {
@@ -463,4 +491,11 @@ public class Cargo extends Problem implements Callable<Integer> {
                 return fluents;
         }
 
+        public boolean isGoal(Map<String, String> state) {
+                return true;
+        }
+
+        public static boolean hasHeuristics(String test) {
+                return true;
+        }
 }

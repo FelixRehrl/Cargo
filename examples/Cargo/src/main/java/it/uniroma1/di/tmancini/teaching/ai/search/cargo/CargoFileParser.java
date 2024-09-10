@@ -2,7 +2,6 @@ package it.uniroma1.di.tmancini.teaching.ai.search.cargo;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -15,7 +14,6 @@ public class CargoFileParser {
         private List<String> goal_state;
 
         public CargoFileParser(String file_path) {
-                System.out.println("Current working directory: " + new File(".").getAbsolutePath()); // Debugging
                 process_input(file_path);
         }
 
@@ -42,38 +40,28 @@ public class CargoFileParser {
 
                         scanner.close();
 
-                        // Print for debugging
-                        // printParsedData();
-
                 } catch (FileNotFoundException e) {
                         e.printStackTrace();
                 }
         }
 
-        // Helper function to parse objects (planes, airports, cargoes)
         private String[] parseObjects(String line, String prefix) {
                 return line.replace(prefix, "").trim().split("\\s+");
         }
 
-        // Helper function to parse state (INITIAL_STATE and GOAL_STATE)
         private List<String> parseState(String line, String prefix) {
                 List<String> states = new ArrayList<>();
                 String[] stateParts = line.replace(prefix, "").trim().split("\\)\\s*");
 
                 for (String part : stateParts) {
                         if (!part.isEmpty()) {
-                                String formatted = part.replaceAll("AT\\(", "").replaceAll("[(),\\s]", ""); // Remove
-                                                                                                            // 'AT',
-                                                                                                            // '(', ')',
-                                                                                                            // and
-                                                                                                            // commas
+                                String formatted = part.replaceAll("AT\\(", "").replaceAll("[(),\\s]", "");
                                 states.add(formatted);
                         }
                 }
                 return states;
         }
 
-        // Helper function to print the parsed data (for debugging)
         private void printParsedData() {
                 for (String plane : planes) {
                         System.out.println(plane);
@@ -94,13 +82,6 @@ public class CargoFileParser {
                 for (String state : goal_state) {
                         System.out.println(state);
                 }
-        }
-
-        // Getters and setters (omitted for brevity)
-        // ...
-
-        public static void main(String[] args) {
-                CargoFileParser parser = new CargoFileParser("first_instance.txt");
         }
 
         public String[] getPlanes() {
