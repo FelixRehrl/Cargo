@@ -1,6 +1,5 @@
 package it.uniroma1.di.tmancini.teaching.ai.search.cargo;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -56,6 +55,16 @@ public class Cargo extends Problem implements Callable<Integer> {
                         "--file" }, defaultValue = "NULL", description = "The file presenting the input data (planes, airports, cargoes) and the initial state")
         private String file_path;
 
+        @CommandLine.Option(names = { "-o",
+                        "--output" }, defaultValue = "0", description = "Output only the stats for the a given run")
+
+        private int output_stats;
+
+        @CommandLine.Option(names = { "-s",
+                        "--seed" }, defaultValue = "0", description = "A seed to randomize exploration of the search tree")
+
+        private long seed;
+
         private Cargo.Heuristics h;
         private String[] planes;
         private String[] cargoes;
@@ -87,6 +96,7 @@ public class Cargo extends Problem implements Callable<Integer> {
                 set_goal_state();
                 initialize_fly_actions();
                 initialize_load_and_unload_actions();
+                CargoState.setRandomSeed(seed);
         }
 
         /**
@@ -300,23 +310,47 @@ public class Cargo extends Problem implements Callable<Integer> {
 
                                 explorer.setVerbosity(SearchStateExplorer.VERBOSITY.values()[vlevel]);
 
-                                System.out.println("\n\n\n===================\n\nAlgorithm " + explorer +
-                                                (setting != null ? " (" + setting + ")" : "") + " started");
+                                if (output_stats < 1) {
+                                        System.out.println("\n\n\n===================\n\nAlgorithm " + explorer +
+                                                        (setting != null ? " (" + setting + ")" : "") + " started");
+
+                                }
 
                                 List<Action> result = explorer.run(initialState);
 
-                                System.out.println("Algorithm " + explorer + " terminated.");
+                                if (output_stats < 1) {
+                                        System.out.println("Algorithm " + explorer + " terminated.");
+                                }
+
                                 explorer.outputStats();
 
-                                System.out.println("Initial state:\n" + initialState);
+                                if (output_stats > 0) {
+                                        CargoFileParser.write_stats_to_output_file(algorithm,
+                                                        this.getHeuristics(),
+                                                        explorer.getDurationMsec(),
+                                                        this.file_path,
+                                                        this.seed);
+                                }
+
+                                if (output_stats > 0) {
+
+                                        System.out.println("Initial state:\n" + initialState);
+                                }
                                 if (result != null) {
-                                        System.out.println(
-                                                        "\n\n\nSolution found by algorithm " + explorer + " ("
-                                                                        + result.size() + " actions):\n");
-                                        int i = 0;
-                                        for (Action a : result) {
-                                                System.out.println(" [" + i + "]" + a);
-                                                i++;
+                                        if (output_stats < 1) {
+                                                System.out.println(
+                                                                "\n\n\nSolution found by algorithm " + explorer + " ("
+                                                                                + result.size() + " actions):\n");
+                                                int i = 0;
+                                                for (Action a : result) {
+                                                        System.out.println(" [" + i + "]" + a);
+                                                        i++;
+                                                }
+                                                if (algorithm.equals("dfs") || algorithm.equals("bfg")) {
+                                                        System.out.println(
+                                                                        "\n\nAlgorithm " + explorer + " terminated.");
+                                                        explorer.outputStats();
+                                                }
                                         }
                                 } else
                                         System.out.println("\n\n\nNo solution found by algorithm " + explorer);

@@ -62,7 +62,7 @@ public abstract class SearchStateExplorer {
 		this(p, null, null);
 	}
 
-	private long getDurationMsec() {
+	public long getDurationMsec() {
 		if (isRunning || durationMsec < 0) {
 			durationMsec = (new java.util.Date()).getTime() - startTime;
 		}

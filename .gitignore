@@ -1,0 +1,50 @@
+
+# Maven build directory
+examples/Cargo/target/
+examples/CargoGraphPlanner/target/
+searchstateexplorer-framework/target/
+# Eclipse-specific files
+.classpath
+.project
+.settings/
+
+# IDEA-specific files
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# NetBeans-specific files
+/nbproject/private/
+/build/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# VSCode-specific files
+.vscode/
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+*.swp
+
+# Maven Wrapper
+.mvn/wrapper/maven-wrapper.jar
+
+# Dependency directories
+lib/
+dependencies/
+
+# Build reports
+site/
+jacoco/
+surefire-reports/
+
+# Local environment-specific files
+.env
+*.properties

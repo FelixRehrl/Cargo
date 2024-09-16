@@ -2,9 +2,16 @@ package it.uniroma1.di.tmancini.teaching.ai.search.cargo;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.PortUnreachableException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+
+import it.uniroma1.di.tmancini.teaching.ai.search.cargo.Cargo.Heuristics;
 
 public class CargoFileParser {
         private String[] planes;
@@ -60,6 +67,27 @@ public class CargoFileParser {
                         }
                 }
                 return states;
+
+        }
+
+        public static void write_stats_to_output_file(String algo, Heuristics heuristics, long millies,
+                        String problem_instance, long seed) {
+
+                try {
+                        write_to_file(algo, heuristics, millies, problem_instance, seed);
+                } catch (Exception e) {
+                        System.out.println("Error writing to output");
+                }
+        }
+
+        private static void write_to_file(String algo, Heuristics heuristics, long millies, String problem_instance,
+                        long seed) throws IOException {
+                String h = heuristics != null ? ":" + heuristics.toString() : "";
+
+                FileWriter fw = new FileWriter("data/output_stats.csv", true);
+                PrintWriter printWriter = new PrintWriter(fw, true);
+                printWriter.printf("%d,%s%s,%s, %d\n", seed, algo, h, problem_instance, millies);
+                printWriter.close();
         }
 
         private void printParsedData() {
@@ -123,4 +151,5 @@ public class CargoFileParser {
         public void setGoal_state(List<String> goal_state) {
                 this.goal_state = goal_state;
         }
+
 }

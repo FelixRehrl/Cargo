@@ -1,0 +1,21 @@
+Seed,Algorithm,InputFile,Duration_sec
+0,bfs,first_instance.txt, 11
+0,dfs,first_instance.txt, 5
+0,mincost,first_instance.txt, 11
+0,a*:UNMET_GOALS,first_instance.txt, 12
+0,bfg:UNMET_GOALS,first_instance.txt, 7
+0,bfs,second_instance.txt, 158
+0,dfs,second_instance.txt, 34
+0,mincost,second_instance.txt, 133
+0,a*:UNMET_GOALS,second_instance.txt, 138
+0,bfg:UNMET_GOALS,second_instance.txt, 28
+0,bfs,third_instance.txt, 158
+0,dfs,third_instance.txt, 83
+0,mincost,third_instance.txt, 171
+0,a*:UNMET_GOALS,third_instance.txt, 174
+0,bfg:UNMET_GOALS,third_instance.txt, 88
+0,bfs,fourth_instance.txt, 513
+0,dfs,fourth_instance.txt, 210
+0,mincost,fourth_instance.txt, 543
+0,a*:UNMET_GOALS,fourth_instance.txt, 568
+0,bfg:UNMET_GOALS,fourth_instance.txt, 142

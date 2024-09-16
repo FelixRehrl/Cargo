@@ -11,6 +11,17 @@ public class CargoState extends State {
 	private Cargo cargo;
 	private int unmet_goals;
 
+	private static Random RANDOM = new Random();
+	private static boolean use_seed = true;
+
+	public static void setRandomSeed(long seed) {
+		CargoState.RANDOM = new Random(seed);
+
+		if (seed == 0) {
+			use_seed = false;
+		}
+	}
+
 	/**
 	 * Constructs a new CargoState with the given Cargo Problem and state array.
 	 *
@@ -45,6 +56,9 @@ public class CargoState extends State {
 		result.addAll(calculate_valid_flyactions());
 		result.addAll(calculate_valid_load_actions());
 		result.addAll(calculate_valid_unload_actions());
+		if (use_seed) {
+			Collections.shuffle(result, RANDOM);
+		}
 		return result;
 	}
 
