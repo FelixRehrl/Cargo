@@ -1,16 +1,14 @@
 #!/bin/bash
 
 JAVA_CMD="java -jar examples/Cargo/target/Cargo.jar" 
-SEEDS=(42 43 44 45 46)  
+SEEDS=(42 43 44)  
 
 ALGORITHMS=(
   "BFS"
   "DFS"
   "MINCOST"
   "A*:UNMET_GOALS"
-  "A*:OTHER"
   "BFG:UNMET_GOALS"
-  "BFG:OTHER"
 )
 
 INPUT_FILES=(
@@ -18,9 +16,9 @@ INPUT_FILES=(
   "second_instance.txt"
   "third_instance.txt"
   "fourth_instance.txt"
-  "fifth_instance.txt"
-  "sixth_instance.txt"
-  "seventh_instance.txt"
+  # "fifth_instance.txt"
+  # "sixth_instance.txt"
+  # "seventh_instance.txt"
 )
 
 OUTPUT_CSV="data/output_stats.csv"

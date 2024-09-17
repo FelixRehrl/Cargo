@@ -89,6 +89,13 @@ Run example:
 `java -jar examples/CargoGraphPlanner/target/CargoGraphPlanner.jar --file={ first_instance.txt, second_instance.txt, third_instance.txt, fourth_instance.txt }
 `
 
+
+### Experimental Results 
+
+To test all the different search algorithms on the instances ( first- to fourth_instance.txt ). Run the bash script `./run_tests.sh`  which will execute all of the algorithms on the instances, and save the ouput in the `data/output_stats.csv` file. 
+Run `python3 plot_results.py` to output a plot, comparing the performance of the various algorithms.
+
+
 ## Maven cheat sheet
 
 To delete all `target` directories, which contain the build outputs, such as `.class` and `.jar` files, run

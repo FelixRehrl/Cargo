@@ -53,9 +53,13 @@ public class Main implements Callable<Integer> {
 
                 Set<Proposition> goal = get_goal_state_propositions();
 
-                int hLevel = planningGraph.hLevel(goal);
+                int set_level = planningGraph.calculate_set_level(goal);
 
-                System.out.println("\n\n hLevel: " + hLevel);
+                // GraphPlanner planner = new GraphPlanner(initial_state, actions, goal, 50);
+                // List<Set<Action>> plan = planner.plan();
+                // System.out.println(plan);
+
+                System.out.println("\n\n set_level: " + set_level);
 
                 return 1;
         }

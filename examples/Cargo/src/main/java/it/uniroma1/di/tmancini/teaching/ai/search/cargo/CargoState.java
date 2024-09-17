@@ -3,6 +3,7 @@ package it.uniroma1.di.tmancini.teaching.ai.search.cargo;
 import java.util.*;
 import java.util.stream.Collectors;
 import it.uniroma1.di.tmancini.teaching.ai.search.*;
+import it.uniroma1.di.tmancini.teaching.ai.search.cargo.Cargo.Heuristics;
 
 public class CargoState extends State {
 
@@ -10,6 +11,7 @@ public class CargoState extends State {
 	private char[] state;
 	private Cargo cargo;
 	private int unmet_goals;
+	private int set_level;
 
 	private static Random RANDOM = new Random();
 	private static boolean use_seed = true;
@@ -32,7 +34,20 @@ public class CargoState extends State {
 		super(c);
 		this.cargo = c;
 		this.state = state;
-		this.unmet_goals = calculate_unmet_goals();
+
+		if (c.getHeuristics() == Heuristics.UNMET_GOALS) {
+			this.unmet_goals = calculate_unmet_goals();
+		}
+		if (c.getHeuristics() == Heuristics.SET_LEVEL) {
+			this.set_level = calculate_set_level();
+		}
+
+	}
+
+	private int calculate_set_level() {
+		CargoPlanningGraph cpg = cargo.getCpg();
+		int set_level = cpg.calculate_set_level(this.state);
+		return set_level;
 	}
 
 	/**
@@ -113,7 +128,8 @@ public class CargoState extends State {
 	 * @return the new CargoState after applying the action.
 	 */
 	public State resultingState(Action a) {
-		CargoState new_state = (CargoState) this.clone();
+		// CargoState new_state = (CargoState) this.clone();
+		CargoState new_state = new CargoState(cargo, state.clone());
 		apply_effects(a, new_state);
 		return new_state;
 	}
@@ -164,6 +180,8 @@ public class CargoState extends State {
 		switch (h) {
 			case UNMET_GOALS:
 				return unmet_goals;
+			case SET_LEVEL:
+				return set_level;
 			default:
 				throw new RuntimeException("Heuristics " + h + " unknown");
 		}

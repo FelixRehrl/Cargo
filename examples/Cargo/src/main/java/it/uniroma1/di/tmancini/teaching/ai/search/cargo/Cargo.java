@@ -17,6 +17,8 @@ import it.uniroma1.di.tmancini.teaching.ai.search.MinCostExplorer;
 import it.uniroma1.di.tmancini.teaching.ai.search.Problem;
 import it.uniroma1.di.tmancini.teaching.ai.search.Action;
 import it.uniroma1.di.tmancini.teaching.ai.search.SearchStateExplorer;
+import it.uniroma1.di.tmancini.teaching.ai.search.cargo.CargoPlanningGraph;
+
 import picocli.CommandLine;
 
 /**
@@ -35,7 +37,7 @@ public class Cargo extends Problem implements Callable<Integer> {
          * algorithms.
          */
         public static enum Heuristics {
-                UNMET_GOALS
+                UNMET_GOALS, SET_LEVEL
         }
 
         @CommandLine.Option(names = { "--algos",
@@ -80,6 +82,8 @@ public class Cargo extends Problem implements Callable<Integer> {
 
         private static ArrayList<String> predicates_verbose = new ArrayList<>();
         private HashMap<String, Integer> predicates_with_index_objects = new HashMap<>();
+
+        private CargoPlanningGraph cpg;
 
         /**
          * Initializes the cargo problem by reading input from the provided file,
@@ -131,6 +135,7 @@ public class Cargo extends Problem implements Callable<Integer> {
          * for false fluents based on the parsed initial state.
          */
         private void set_initial_state() {
+
                 state_size = calculate_state_size(planes.length, airports.length, cargoes.length);
                 this.initial_state = new char[state_size];
                 Arrays.fill(this.initial_state, 'F');
@@ -268,8 +273,6 @@ public class Cargo extends Problem implements Callable<Integer> {
         public Integer call() {
                 try {
                         instaniate_problem(this.file_path);
-                        CargoState initialState = new CargoState(this, initial_state);
-                        System.out.println("[INFO]  Initial state: " + initialState);
 
                         SearchStateExplorer explorer;
                         for (String algo : algos) {
@@ -309,6 +312,9 @@ public class Cargo extends Problem implements Callable<Integer> {
                                 }
 
                                 explorer.setVerbosity(SearchStateExplorer.VERBOSITY.values()[vlevel]);
+
+                                CargoState initialState = new CargoState(this, initial_state);
+                                System.out.println("[INFO]  Initial state: " + initialState);
 
                                 if (output_stats < 1) {
                                         System.out.println("\n\n\n===================\n\nAlgorithm " + explorer +
@@ -386,6 +392,9 @@ public class Cargo extends Problem implements Callable<Integer> {
 
         public void setHeuristics(Heuristics h) {
                 this.h = h;
+                if (h == Heuristics.SET_LEVEL) {
+                        this.cpg = new CargoPlanningGraph(this);
+                }
         }
 
         public void clearHeuristics() {
@@ -531,5 +540,105 @@ public class Cargo extends Problem implements Callable<Integer> {
 
         public static boolean hasHeuristics(String test) {
                 return true;
+        }
+
+        public static boolean isDebug() {
+                return debug;
+        }
+
+        public static void setDebug(boolean debug) {
+                Cargo.debug = debug;
+        }
+
+        public String getFile_path() {
+                return file_path;
+        }
+
+        public void setFile_path(String file_path) {
+                this.file_path = file_path;
+        }
+
+        public int getOutput_stats() {
+                return output_stats;
+        }
+
+        public void setOutput_stats(int output_stats) {
+                this.output_stats = output_stats;
+        }
+
+        public long getSeed() {
+                return seed;
+        }
+
+        public void setSeed(long seed) {
+                this.seed = seed;
+        }
+
+        public ArrayList<String> getAt() {
+                return at;
+        }
+
+        public void setAt(ArrayList<String> at) {
+                this.at = at;
+        }
+
+        public ArrayList<String> getGoal() {
+                return goal;
+        }
+
+        public void setGoal(ArrayList<String> goal) {
+                this.goal = goal;
+        }
+
+        public void setGoal_fluents(ArrayList<Integer> goal_fluents) {
+                this.goal_fluents = goal_fluents;
+        }
+
+        public HashMap<Integer, String> getObject_number_map() {
+                return object_number_map;
+        }
+
+        public void setObject_number_map(HashMap<Integer, String> object_number_map) {
+                this.object_number_map = object_number_map;
+        }
+
+        public int getState_size() {
+                return state_size;
+        }
+
+        public void setState_size(int state_size) {
+                this.state_size = state_size;
+        }
+
+        public char[] getInitial_state() {
+                return initial_state;
+        }
+
+        public void setInitial_state(char[] initial_state) {
+                this.initial_state = initial_state;
+        }
+
+        public static ArrayList<String> getPredicates_verbose() {
+                return predicates_verbose;
+        }
+
+        public static void setPredicates_verbose(ArrayList<String> predicates_verbose) {
+                Cargo.predicates_verbose = predicates_verbose;
+        }
+
+        public HashMap<String, Integer> getPredicates_with_index_objects() {
+                return predicates_with_index_objects;
+        }
+
+        public void setPredicates_with_index_objects(HashMap<String, Integer> predicates_with_index_objects) {
+                this.predicates_with_index_objects = predicates_with_index_objects;
+        }
+
+        public CargoPlanningGraph getCpg() {
+                return cpg;
+        }
+
+        public void setCpg(CargoPlanningGraph cpg) {
+                this.cpg = cpg;
         }
 }

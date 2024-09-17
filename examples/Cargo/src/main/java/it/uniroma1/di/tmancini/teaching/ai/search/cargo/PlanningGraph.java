@@ -1,4 +1,4 @@
-package it.uniroma1.di.tmancini.teaching.ai.search.graphPlanner;
+package it.uniroma1.di.tmancini.teaching.ai.search.cargo;
 
 import java.util.*;
 
@@ -51,7 +51,7 @@ class Proposition {
 /**
  * Represents an action in the planning graph.
  */
-class Action {
+class Planning_Action {
 
         String name;
         Set<Proposition> preconditions;
@@ -64,7 +64,7 @@ class Action {
          * @param preconditions the preconditions for the action.
          * @param effects       the effects of the action.
          */
-        public Action(String name, Set<Proposition> preconditions, Set<Proposition> effects) {
+        public Planning_Action(String name, Set<Proposition> preconditions, Set<Proposition> effects) {
                 this.name = name;
                 this.preconditions = preconditions;
                 this.effects = effects;
@@ -93,19 +93,15 @@ class Action {
         public boolean equals(Object obj) {
                 if (this == obj)
                         return true;
-                if (!(obj instanceof Action))
+                if (!(obj instanceof Planning_Action))
                         return false;
-                Action action = (Action) obj;
+                Planning_Action action = (Planning_Action) obj;
                 return this.name.equals(action.name);
         }
 
         @Override
         public int hashCode() {
                 return Objects.hash(name, preconditions, effects);
-        }
-
-        public Set<Proposition> getEffects() {
-                return effects;
         }
 }
 
@@ -123,7 +119,7 @@ class Mutex {
          * @param a1 the first action.
          * @param a2 the second action.
          */
-        public void addActionMutexLink(Action a1, Action a2) {
+        public void addActionMutexLink(Planning_Action a1, Planning_Action a2) {
                 mutexActionLinks.add(new MutexActionLink(a1, a2));
         }
 
@@ -144,7 +140,7 @@ class Mutex {
          * @param a2 the second action.
          * @return true if the actions are mutex, false otherwise.
          */
-        public boolean areActionsMutex(Action a1, Action a2) {
+        public boolean areActionsMutex(Planning_Action a1, Planning_Action a2) {
                 return mutexActionLinks.contains(new MutexActionLink(a1, a2));
         }
 
@@ -163,10 +159,10 @@ class Mutex {
          * Represents a mutual exclusion (mutex) link between two actions.
          */
         class MutexActionLink {
-                Action a1;
-                Action a2;
+                Planning_Action a1;
+                Planning_Action a2;
 
-                public MutexActionLink(Action a1, Action a2) {
+                public MutexActionLink(Planning_Action a1, Planning_Action a2) {
                         this.a1 = a1;
                         this.a2 = a2;
                 }
@@ -214,7 +210,7 @@ class Mutex {
 public class PlanningGraph {
 
         List<Set<Proposition>> propositionLayers = new ArrayList<>();
-        List<Set<Action>> actionLayers = new ArrayList<>();
+        List<Set<Planning_Action>> actionLayers = new ArrayList<>();
         List<Mutex> mutexLayers = new ArrayList<>();
         Set<Proposition> initial_state_propositions = new HashSet<>();
 
@@ -225,23 +221,28 @@ public class PlanningGraph {
          * @param actions      the set of actions available.
          * @param depth        the depth of the planning graph.
          */
-        public PlanningGraph(Set<Proposition> initialState, Set<Action> actions, int depth) {
+        public PlanningGraph(Set<Proposition> initialState, Set<Planning_Action> actions, int depth) {
                 Set<Proposition> currentPropositions = new HashSet<>(initialState);
                 propositionLayers.add(currentPropositions);
 
                 for (int i = 0; i < depth; i++) {
                         Mutex mutexLayer = new Mutex();
-                        Set<Action> newActions = new HashSet<>();
+                        Set<Planning_Action> newActions = new HashSet<>();
+
+                        if (i > 0) {
+                                Set<Planning_Action> oldActions = actionLayers.get(actionLayers.size() - 1);
+                                newActions.addAll(oldActions);
+                        }
 
                         Set<Proposition> oldPropositions = propositionLayers.get(propositionLayers.size() - 1);
                         Set<Proposition> newPropositions = new HashSet<>(oldPropositions);
 
-                        for (Action action : actions) {
+                        for (Planning_Action action : actions) {
                                 if (action.canBeApplied(currentPropositions)) {
                                         newActions.add(action);
                                         newPropositions.addAll(action.effects);
 
-                                        for (Action otherAction : newActions) {
+                                        for (Planning_Action otherAction : newActions) {
                                                 if (action != otherAction && areActionsMutex(action, otherAction)) {
                                                         mutexLayer.addActionMutexLink(action, otherAction);
                                                 }
@@ -275,7 +276,7 @@ public class PlanningGraph {
          * @param a2 the second action.
          * @return true if the actions are mutex, false otherwise.
          */
-        private boolean areActionsMutex(Action a1, Action a2) {
+        private boolean areActionsMutex(Planning_Action a1, Planning_Action a2) {
                 return inconsistent_effect(a1, a2) || interference(a1, a2) || competing_needs(a1, a2);
         }
 
@@ -286,7 +287,7 @@ public class PlanningGraph {
          * @param a2 the second action.
          * @return true if there are competing needs, false otherwise.
          */
-        private boolean competing_needs(Action a1, Action a2) {
+        private boolean competing_needs(Planning_Action a1, Planning_Action a2) {
                 for (Proposition precondition1 : a1.preconditions) {
                         for (Proposition precondition2 : a2.preconditions) {
                                 if (precondition1.areOpposites(precondition2)) {
@@ -304,7 +305,7 @@ public class PlanningGraph {
          * @param a2 the second action.
          * @return true if there is interference, false otherwise.
          */
-        private boolean interference(Action a1, Action a2) {
+        private boolean interference(Planning_Action a1, Planning_Action a2) {
                 for (Proposition effect1 : a1.effects) {
                         for (Proposition precondition2 : a2.preconditions) {
                                 if (effect1.areOpposites(precondition2)) {
@@ -329,7 +330,7 @@ public class PlanningGraph {
          * @param a2 the second action.
          * @return true if the effects are inconsistent, false otherwise.
          */
-        private boolean inconsistent_effect(Action a1, Action a2) {
+        private boolean inconsistent_effect(Planning_Action a1, Planning_Action a2) {
                 for (Proposition effect1 : a1.effects) {
                         for (Proposition effect2 : a2.effects) {
                                 if (effect1.areOpposites(effect2)) {
@@ -366,18 +367,18 @@ public class PlanningGraph {
          * @param p2 the second proposition.
          * @return true if the propositions are mutex, false otherwise.
          */
-        private boolean arePropositionsMutex(Proposition p1, Proposition p2, Set<Action> newActions) {
+        private boolean arePropositionsMutex(Proposition p1, Proposition p2, Set<Planning_Action> newActions) {
 
                 // Propositions are opposites
                 if (p1.name.equals("!" + p2.name) || p2.name.equals("!" + p1.name)) {
                         return true;
                 }
 
-                Set<Action> actions_supporting_p1 = new HashSet<>();
-                Set<Action> actions_supporting_p2 = new HashSet<>();
+                Set<Planning_Action> actions_supporting_p1 = new HashSet<>();
+                Set<Planning_Action> actions_supporting_p2 = new HashSet<>();
 
                 // Returns true if all respective actions are mutex
-                for (Action action : newActions) {
+                for (Planning_Action action : newActions) {
 
                         if (action.effects.contains(p1)) {
                                 actions_supporting_p1.add(action);
@@ -388,8 +389,8 @@ public class PlanningGraph {
                         }
                 }
 
-                for (Action a1 : actions_supporting_p1) {
-                        for (Action a2 : actions_supporting_p2) {
+                for (Planning_Action a1 : actions_supporting_p1) {
+                        for (Planning_Action a2 : actions_supporting_p2) {
                                 if (!areActionsMutex(a1, a2)) {
                                         return false;
                                 }
@@ -429,21 +430,5 @@ public class PlanningGraph {
                                 System.out.println("Layer " + i + " - Actions: " + actionLayers.get(i));
                         }
                 }
-        }
-
-        public List<Set<Proposition>> getPropositionLayers() {
-                return propositionLayers;
-        }
-
-        public List<Set<Action>> getActionLayers() {
-                return actionLayers;
-        }
-
-        public List<Mutex> getMutexLayers() {
-                return mutexLayers;
-        }
-
-        public Set<Proposition> getInitial_state_propositions() {
-                return initial_state_propositions;
         }
 }
