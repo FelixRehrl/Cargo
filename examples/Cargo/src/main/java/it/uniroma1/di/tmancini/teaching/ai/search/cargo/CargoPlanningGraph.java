@@ -39,6 +39,11 @@ public class CargoPlanningGraph {
 
         }
 
+        /**
+         * @param state char array representation of the cargo state
+         * 
+         * @return the goal state as a set of Proposition objects.
+         */
         private Set<Proposition> create_proposition_map_from_state(char[] state) {
 
                 ArrayList<String> fluents = new ArrayList<>();

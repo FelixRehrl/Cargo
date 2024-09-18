@@ -314,9 +314,9 @@ public class Cargo extends Problem implements Callable<Integer> {
                                 explorer.setVerbosity(SearchStateExplorer.VERBOSITY.values()[vlevel]);
 
                                 CargoState initialState = new CargoState(this, initial_state);
-                                System.out.println("[INFO]  Initial state: " + initialState);
 
                                 if (output_stats < 1) {
+                                        System.out.println("[INFO]  Initial state: " + initialState);
                                         System.out.println("\n\n\n===================\n\nAlgorithm " + explorer +
                                                         (setting != null ? " (" + setting + ")" : "") + " started");
 
@@ -326,11 +326,9 @@ public class Cargo extends Problem implements Callable<Integer> {
 
                                 if (output_stats < 1) {
                                         System.out.println("Algorithm " + explorer + " terminated.");
-                                }
-
-                                explorer.outputStats();
-
-                                if (output_stats > 0) {
+                                        explorer.outputStats();
+                                        System.out.println("Initial state:\n" + initialState);
+                                } else {
                                         CargoFileParser.write_stats_to_output_file(algorithm,
                                                         this.getHeuristics(),
                                                         explorer.getDurationMsec(),
@@ -338,10 +336,6 @@ public class Cargo extends Problem implements Callable<Integer> {
                                                         this.seed);
                                 }
 
-                                if (output_stats > 0) {
-
-                                        System.out.println("Initial state:\n" + initialState);
-                                }
                                 if (result != null) {
                                         if (output_stats < 1) {
                                                 System.out.println(
@@ -352,7 +346,8 @@ public class Cargo extends Problem implements Callable<Integer> {
                                                         System.out.println(" [" + i + "]" + a);
                                                         i++;
                                                 }
-                                                if (algorithm.equals("dfs") || algorithm.equals("bfg")) {
+                                                if (algorithm.equals("dfs")
+                                                                || algorithm.equals("bfg") && output_stats > 0) {
                                                         System.out.println(
                                                                         "\n\nAlgorithm " + explorer + " terminated.");
                                                         explorer.outputStats();

@@ -3,6 +3,7 @@
 examples/Cargo/target/
 examples/CargoGraphPlanner/target/
 searchstateexplorer-framework/target/
+META-INF/
 # Eclipse-specific files
 .classpath
 .project

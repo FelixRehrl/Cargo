@@ -7,7 +7,6 @@ import it.uniroma1.di.tmancini.teaching.ai.search.cargo.Cargo.Heuristics;
 
 public class CargoState extends State {
 
-	private boolean debug = false;
 	private char[] state;
 	private Cargo cargo;
 	private int unmet_goals;
